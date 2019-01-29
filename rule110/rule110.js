@@ -22,16 +22,9 @@ function array_to_txt(array){
     return(s)
 }
 
-function txt_to_array(txt){ //Taken and adapted from my sudokunator
-    var r = [];
-    var splitted = txt.split("\s");
-    for (var i = 0; i < splitted.length; i++) {
-        var clean = splitted[i].replace(/\s*/, "");
-        var elements = clean.split(/\s+/);
-    }
-	for (var j = 0; j < elements.length; j++){
-		r.push(elements[j]);	
-	}
+function txt_to_array(txt){
+    var r = txt.split(/(?:\s*|\n*)/);
+	r.shift();
     return(r);
 }
 
@@ -60,11 +53,11 @@ function browser_start(){
 		
 		if(input["card"].length < 3){ //U: There is no card
 			var out= oneturn_o_automaton();
-			uiCard.innerHTML= array_to_txt(out["card"]);
+			uiCard.value= array_to_txt(out["card"]);
 		} else {
 			turn += 1;
 			var out= oneturn_o_automaton(input, turn);
-			uiCard.innerHTML= array_to_txt(out["card"]);
+			uiCard.value= array_to_txt(out["card"]);
 		}
 		uiTxtCell.innerHTML= "This is turn " + (turn+1);
 		uiBtn1.innerHTML= "Next Turn";

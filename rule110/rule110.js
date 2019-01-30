@@ -15,8 +15,8 @@ function generator(width = 9, height = 1){ //U: Generates a one dimensional card
 
 function array_to_txt(array){
     var s = '';
-    for (var x = 0; x < array.length; x++) { //U: Separates each cell with two spaces
-		s+= "  " + (array[x]);
+    for (var x = 0; x < array.length; x++) { //U: Separates each cell with three spaces
+		s+= "   " + (array[x]);
     }
 	//console.log("S:",s);
     return(s)
@@ -32,7 +32,8 @@ function txt_to_array(txt){
 //S: Browser things
 
 var uiTxtTurns;
-var uiTxtCell;
+var uiTxtCard;
+var uiTxtSize;
 var uiCard;
 var uiBtn1;
 var uiBtn2;
@@ -40,33 +41,41 @@ var turn;
 
 function browser_start(){
 	turn = 0;
-	uiTxtCell = document.getElementById("text_over_card");
-	
+	uiTxtCard = document.getElementById("text_over_card");
+	uiTxtSize= document.getElementById("card_size");
 	uiCard = document.getElementById("card");
 	
 	uiBtn1 = document.getElementById("next_turn");
 	uiBtn1.onclick = function(){
 		var input= {};
+		if(isNaN(uiTxtSize.value)){ //XXX: Doesn't account for empty textarea
+			input["width"]= 8
+		} else {
+			input["width"]= uiTxtSize.value;
+		}
 		input["height"]= 1;
 		input["card"]= txt_to_array(uiCard.value);
-		input["width"]= input["card"].length;
+
+		uiCard.cols= input["width"] + input["width"] * 3 + 3;
 		
 		if(input["card"].length < 3){ //U: There is no card
-			var out= oneturn_o_automaton();
+			delete input.card;
+			var out= oneturn_o_automaton(input);
 			uiCard.value= array_to_txt(out["card"]);
 		} else {
 			turn += 1;
 			var out= oneturn_o_automaton(input, turn);
 			uiCard.value= array_to_txt(out["card"]);
 		}
-		uiTxtCell.innerHTML= "This is turn " + (turn+1);
+		uiTxtCard.innerHTML= "This is turn " + (turn+1);
 		uiBtn1.innerHTML= "Next Turn";
 	}
 	
 	uiBtn2 = document.getElementById("clear");
 	uiBtn2.onclick = function(){
-		uiTxtCell.innerHTML= "Press the button to start"
-		uiCard.innerHTML = "";
+		uiTxtCard.innerHTML= "Press the button to start"
+		uiBtn1.innerHTML= "First Turn";
+		uiCard.value = "";
 		turn = 0;
 	}
 }
@@ -91,6 +100,7 @@ function o_automaton(cardInfo){ //U: Processes the card
 
 		if (current != 1 && current != 0) { //U: Checks for any weird number
 			alert("This game only takes 1 or 0 in the cells, you have a " + current + " on position " + (n+1));
+			return cardInfo
 		} else {
 			if (previous == null){ //U: For the first cell it uses the last cell as the previous one
 				previous= card[card.length-1];
@@ -130,8 +140,8 @@ function test_o_automaton(){
 }
 
 function oneturn_o_automaton(cardInfo, t = 0){ //U: Processes one turn
-	if(!cardInfo){
-		var cardInfo= generator();
+	if(!cardInfo["card"]){
+		var cardInfo= generator(cardInfo["width"]);
 	}
 	console.log("Input", cardInfo);
 	

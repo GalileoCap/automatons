@@ -13,6 +13,69 @@ function generator(width = 9, height = 9){ //U: Creates a two dimensional card
 	return cardInfo
 }
 
+function array_to_txt(array){ //Adapted from my sudokunator
+	var card= array["card"];
+	var r= '';
+    for (var y = 0; y < array["height"]; y++) { //U: Separates each cell with two spaces
+		for (var x = 0; x < array["width"]; x++) {
+			r+= "   " + (card[y * 9 + x]);
+		}
+		r+= "\n";
+    }
+    return(r)
+}
+
+function txt_to_array(txt){
+    var r = txt.split(/(?:\s*|\n*)/);
+	r.shift(); //U: The first item will be empty
+	r.pop();
+    return(r);
+}
+
+//*****************
+//S: Browser things
+
+var uiTxtTurns;
+var uiTxtCell;
+var uiCard;
+var uiBtn1;
+var uiBtn2;
+var turn;
+
+function browser_start(){
+	turn = 0;
+	uiTxtCell = document.getElementById("text_over_card");
+	
+	uiCard = document.getElementById("card");
+	
+	uiBtn1 = document.getElementById("next_turn");
+	uiBtn1.onclick = function(){
+		var input= {};
+		input["height"]= 9;
+		input["card"]= txt_to_array(uiCard.value);
+		input["width"]= 9;
+		
+		if(input["card"].length < 3){ //U: There is no card (3 is an arbitrary number)
+			var out= oneturn_t_automaton();
+			uiCard.value= array_to_txt(out);
+		} else {
+			turn += 1;
+			var out= oneturn_t_automaton(input, turn);
+			uiCard.value= array_to_txt(out);
+		}
+		uiTxtCell.innerHTML= "This is turn " + (turn+1);
+		uiBtn1.innerHTML= "Next Turn";
+	}
+	
+	uiBtn2 = document.getElementById("clear");
+	uiBtn2.onclick = function(){
+		uiTxtCell.innerHTML= "Press the button to start"
+		uiBtn1.innerHTML= "First Turn";
+		uiCard.value = "";
+		turn = 0;
+	}
+}
+
 //*****************************************************
 //S: Two dimensional automaton (Connway's Game of Life)
 
@@ -66,11 +129,13 @@ function t_automaton(cardInfo){ //U: Processes the card
 }
 
 function oneturn_t_automaton(cardInfo, t = 0){ //U: Processes one turn
-	console.log("Previos", cardInfo);
-	
-	var nextCard = t_automaton(cardInfo);
-	
-	console.log("Turn", t+1, "card", nextCard);
+	if(!cardInfo){
+		var nextCard= generator();
+	} else {
+		console.log("Input", cardInfo);
+		var nextCard= t_automaton(cardInfo);
+	}
+	console.log("Output for turn", t+1, nextCard);
 	return nextCard
 }
 
